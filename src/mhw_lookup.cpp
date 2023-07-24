@@ -107,6 +107,16 @@ namespace {
 		return true;
 	}
 
+	bool lte(float x, float y)
+	{
+		return x < y + std::numeric_limits<float>::epsilon();
+	}
+
+	bool gte(float x, float y)
+	{
+		return x > y - std::numeric_limits<float>::epsilon();
+	}
+
 	// try get a single monster's data
 	bool get_data_single_monster(const size_t maddr, memory::browser& mb, ui::mhw_data::monster_info& m) {
 		const auto	realmaddr = maddr + offsets::Monster::MonsterStartOfStructOffset + offsets::Monster::MonsterHealthComponentOffset;
@@ -141,12 +151,13 @@ namespace {
 			m.body_size = m_stored_data->base_size * modified_size_scale;
 			const mhw_lookup::crown_preset_data* m_crown_preset = get_crown_preset(m_stored_data->crown_preset);
 			if (m_crown_preset) {
-				if (modified_size_scale <= m_crown_preset->mini)
+				if (lte(modified_size_scale, m_crown_preset->mini))
 					m.crown = "Mini";
-				else if (modified_size_scale >= m_crown_preset->gold)
+				else if (gte(modified_size_scale, m_crown_preset->gold))
 					m.crown = "Gold";				
-				else if (modified_size_scale >= m_crown_preset->silver)
+				else if (gte(modified_size_scale, m_crown_preset->silver)) {
 					m.crown = "Silver";
+				}
 				else m.crown = "<none>";
 			}
 		}	

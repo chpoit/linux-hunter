@@ -16,8 +16,8 @@ extern void ui::draw(vbrush::iface* b, const size_t flags, const app_data& ad, c
 	Player Name 32                          Id 4Damage 10 % 6
 	EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEIIIIDDDDDDDDDDPPPPPP
 	 */ 
-	// if crown data is enabled, the total h_offset has ot be increased by 8
-	const unsigned	h_add_offset = ((flags & draw_flags::SHOW_CROWN_DATA) ? 8 : 0);
+	// if crown data is enabled, the total h_offset has ot be increased by 20
+	const unsigned h_add_offset = ((flags & draw_flags::SHOW_CROWN_DATA) ? 20 : 0);
 	
 	if (!compact_display) {
 		// print title
@@ -98,9 +98,9 @@ extern void ui::draw(vbrush::iface* b, const size_t flags, const app_data& ad, c
 		b->next_row(compact_display ? 1 : 2);
 		// then Monsters - first header
 		if(flags & draw_flags::SHOW_CROWN_DATA)
-			std::snprintf(buf, 256, "%-32s%-14s%-8s%-8s", "Monster Name", "HP", "%","Crown");
+			std::snprintf(buf, 256, "%-36s%-14s%-8s%-8s%-8s", "Monster Name", "HP", "%", "Size", "Crown");
 		else
-			std::snprintf(buf, 256, "%-32s%-14s%-8s", "Monster Name", "HP", "%");
+			std::snprintf(buf, 256, "%-36s%-14s%-8s", "Monster Name", "HP", "%");
 		b->set_attr_on(vbrush::iface::attr::REVERSE);
 		b->draw_text(buf);
 		b->set_attr_off(vbrush::iface::attr::REVERSE);
@@ -116,9 +116,9 @@ extern void ui::draw(vbrush::iface* b, const size_t flags, const app_data& ad, c
 			b->next_row();
 			if(mi.hp_current <= 0.001) b->set_attr_on(vbrush::iface::attr::DIM);
 			if(flags & draw_flags::SHOW_CROWN_DATA)
-				std::snprintf(buf, 256, "%-32s %6d/%6d%8.2f%8s", mi.name, (int)mi.hp_current, (int)mi.hp_total, 100.0*mi.hp_current/mi.hp_total, mi.crown);
+				std::snprintf(buf, 256, "%-36s %6d/%6d%8.2f%8.2f%8s", mi.name, (int)mi.hp_current, (int)mi.hp_total, 100.0*mi.hp_current/mi.hp_total, mi.body_size, mi.crown);
 			else
-				std::snprintf(buf, 256, "%-32s %6d/%6d%8.2f", mi.name, (int)mi.hp_current, (int)mi.hp_total, 100.0*mi.hp_current/mi.hp_total);
+				std::snprintf(buf, 256, "%-36s %6d/%6d%8.2f", mi.name, (int)mi.hp_current, (int)mi.hp_total, 100.0*mi.hp_current/mi.hp_total);
 			b->draw_text(buf);
 			if(mi.hp_current <= 0.001) b->set_attr_off(vbrush::iface::attr::DIM);
 			++cur_monster;
