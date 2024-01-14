@@ -69,11 +69,13 @@ namespace {
 			lazy_alloc = true,
 			direct_mem = true,
 			no_color = false,
-			compact_display = false;
+			compact_display = false,
+			monsters_only = false;
 	size_t		refresh_interval = 1000;
 
 	void print_help(const char *prog, const char *version) {
 		std::cerr <<	"Usage: " << prog << " [options]\nExecutes linux-hunter " << version << "\n\n"
+				"-v, --monsters-only    If true, only shows monster data in the vkdto file\n"
 				"-m, --show-monsters    Shows HP monsters data (requires slightly more CPU usage)\n"
 				"-c, --show-crowns      Shows information about crowns (Gold Small, Silver Large and Gold Large)\n"
 				"-s, --save dir         Captures the specified pid into directory 'dir' and quits\n"
@@ -117,6 +119,7 @@ namespace {
 		static struct option	long_options[] = {
 			{"help",		no_argument,	   0,	0},
 			{"mhw-pid",		required_argument, 0,   0},
+			{"monsters-only",	no_argument,       0,	'v'},
 			{"show-monsters",	no_argument,	   0,	'm'},
 			{"show-crowns",	    no_argument,	   0,	'c'},
 			{"save",		required_argument, 0,	's'},
@@ -137,7 +140,7 @@ namespace {
 			// getopt_long stores the option index here
 			int		option_index = 0;
 
-			if(-1 == (c = getopt_long(argc, argv, "s:l:r:mcf:", long_options, &option_index)))
+			if(-1 == (c = getopt_long(argc, argv, "s:l:r:vmcf:",  long_options, &option_index)))
 				break;
 
 			switch (c) {
@@ -194,6 +197,10 @@ namespace {
 
 			case 'c': {
 				show_crowns_data = true;
+			} break;
+			
+			case 'v':{
+				monsters_only = true;
 			} break;
 
 			case '?':
@@ -289,6 +296,10 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		// print out basic patterns
+		if (monsters_only){
+			std::cerr << "Only showing monsters for vkdto" << std::endl;
+		}
+
 		std::cerr << "Finding main AoB entry points..." << std::endl;
 		mb.find_patterns(&p_vec[0], &p_vec[sizeof(p_vec)/sizeof(p_vec[0])], debug_all);
 		if(debug_ptrs) {
@@ -337,7 +348,7 @@ int main(int argc, char *argv[]) {
 			mb.update();
 			mhw_lookup::get_data(mhwpd, mb, mhwd);
 			ui::draw(w_dpy.get(), draw_flags, ad, mhwd, no_color, compact_display);
-			if(f_dpy) ui::draw(f_dpy.get(), draw_flags, ad, mhwd, no_color, compact_display);
+			if(f_dpy) ui::draw(f_dpy.get(), draw_flags, ad, mhwd, no_color, compact_display, monsters_only);
 			size_t			cur_refresh_tm = 0;
 			do {
 				const auto 	tm_get = tt.get_wall();
