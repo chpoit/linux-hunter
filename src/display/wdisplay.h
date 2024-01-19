@@ -21,7 +21,7 @@
 #include "vbrush.h"
 
 namespace wdisplay {
-	extern vbrush::iface* get(void);
+	extern vbrush::Interface* get(void);
 }
 
 #endif //_WDISPLAY_H_

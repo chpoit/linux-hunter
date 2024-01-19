@@ -52,7 +52,7 @@ namespace {
 	}
 	
 	// get session info 
-	bool get_data_session(const memory::pattern* player, memory::browser& mb, ui::mhw_data& d) {
+	bool get_data_session(const memory::pattern* player, memory::browser& mb, data::mhw_data& d) {
 		const auto	pnameptr = mb.load_effective_addr_rel(player->mem_location, true);
 		const auto	pnameaddr = mb.read_mem<uint32_t>(pnameptr, true);
 		// get session name (this should be UTF-8)...
@@ -74,7 +74,7 @@ namespace {
 	}
 
 	// try get players' damage (need name too)
-	bool get_data_damage(const mhw_lookup::pattern_data& pd, memory::browser& mb, ui::mhw_data& d) {
+	bool get_data_damage(const mhw_lookup::pattern_data& pd, memory::browser& mb, data::mhw_data& d) {
 		const auto	pnameptr = mb.load_effective_addr_rel(pd.player->mem_location, true);
 		const auto	pnameaddr = mb.read_mem<uint32_t>(pnameptr, true);
 		const auto	pdmgroot = mb.load_effective_addr_rel(pd.damage->mem_location, true);
@@ -118,7 +118,7 @@ namespace {
 	}
 
 	// try get a single monster's data
-	bool get_data_single_monster(const size_t maddr, memory::browser& mb, ui::mhw_data::monster_info& m) {
+	bool get_data_single_monster(const size_t maddr, memory::browser& mb, data::mhw_data::monster_info& m) {
 		const auto	realmaddr = maddr + offsets::Monster::MonsterStartOfStructOffset + offsets::Monster::MonsterHealthComponentOffset;
 		size_t		hcompaddr = 0;
 		if(!mb.safe_read_mem<size_t>(maddr + offsets::Monster::MonsterHealthComponentOffset, hcompaddr, true))
@@ -170,7 +170,7 @@ namespace {
 	// Seems to rely less on initial offset, which is harder to
 	// maintain on Linux - rely more on jumping through pointers
 	// which should be easier to maintain on Linux
-	bool get_data_monster(const memory::pattern* monster, memory::browser& mb, ui::mhw_data& d) {
+	bool get_data_monster(const memory::pattern* monster, memory::browser& mb, data::mhw_data& d) {
 		const auto	mrootptr = mb.load_effective_addr_rel(monster->mem_location, true);
 		const uint32_t	mlistlookup[] = { 0x698, 0x0, 0x138, 0x0 };
 		size_t		monsters[3] = { 0 };
@@ -205,8 +205,8 @@ namespace {
 	}
 }
 
-void mhw_lookup::get_data(const mhw_lookup::pattern_data& pd, memory::browser& mb, ui::mhw_data& d) {
-	d = ui::mhw_data();
+void mhw_lookup::get_data(const mhw_lookup::pattern_data& pd, memory::browser& mb, data::mhw_data& d) {
+	d = data::mhw_data();
 	if(!get_data_session(pd.player, mb, d))
 		return;
 	if(get_data_ishunt(pd.lobby, mb) && pd.damage)

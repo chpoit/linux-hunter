@@ -16,7 +16,7 @@
  * */
 
 #include "fdisplay.h"
-#include "hashtext_fmt.h"
+#include "../hashtext_fmt.h"
 #include <string>
 #include <cstring>
 #include <cstdio>
@@ -36,7 +36,7 @@ namespace {
 		return std::string(fname, p+1);
 	}
 
-	class fimpl : public vbrush::iface {
+	class FileDisplay : public vbrush::Interface {
 		const std::string	fname_,
 		      			basedir_;
 		std::string		tmpfile_;
@@ -51,12 +51,12 @@ namespace {
 					throw std::runtime_error("Can't write display file");
 		}
 	public:
-		fimpl(const char* fname) : fname_(fname), basedir_(get_basedir(fname)), tmpfh_(-1), iter_(0) {
+		FileDisplay(const char* fname) : fname_(fname), basedir_(get_basedir(fname)), tmpfh_(-1), iter_(0) {
 			if(fname_.empty())
 				throw std::runtime_error("Empty file display name provided");
 		}
 
-		~fimpl() {
+		~FileDisplay() {
 			// remove the target file and tmp, don't care about
 			// results if we can remove of not
 			std::remove(fname_.c_str());
@@ -125,7 +125,7 @@ namespace {
 					throw std::runtime_error("Can't write display file");
 		}
 
-		virtual void set_attr_on(const vbrush::iface::attr a) {
+		virtual void set_attr_on(const vbrush::Interface::attr a) {
 			switch(a) {
 			case BOLD: {
 				write_attr(ht_fmt::BOLD_ON);
@@ -153,7 +153,7 @@ namespace {
 			}
 		}
 
-		virtual void set_attr_off(const vbrush::iface::attr a) {
+		virtual void set_attr_off(const vbrush::Interface::attr a) {
 			switch(a) {
 			case BOLD: {
 				write_attr(ht_fmt::BOLD_OFF);
@@ -195,7 +195,7 @@ namespace {
 	};
 }
 
-vbrush::iface* fdisplay::get(const char *fname) {
-	return new fimpl(fname);
+vbrush::Interface* fdisplay::get(const char *fname) {
+	return new FileDisplay(fname);
 }
 

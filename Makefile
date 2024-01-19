@@ -15,34 +15,34 @@ DATE=$(shell date +"%Y-%m-%d")
 $(EXEC) : $(OBJS)
 	$(LINK) $(OBJS) -o $(EXEC) $(FLAGS) $(LIBS)
 
-$(OBJDIR)/wdisplay.o: src/wdisplay.cpp src/wdisplay.h src/vbrush.h $(OBJDIR)/__setup_obj_dir
-	$(CPPC) $(FLAGS) src/wdisplay.cpp -c -o $@
+$(OBJDIR)/wdisplay.o: src/display/wdisplay.cpp src/display/wdisplay.h src/display/vbrush.h $(OBJDIR)/__setup_obj_dir
+	$(CPPC) $(FLAGS) src/display/wdisplay.cpp -c -o $@
 
-$(OBJDIR)/mhw_lookup.o: src/mhw_lookup.cpp src/mhw_lookup.h src/memory.h \
- src/patterns.h src/ui.h src/timer.h src/vbrush.h \
- src/mhw_lookup_monster.h src/offsets.h $(OBJDIR)/__setup_obj_dir
-	$(CPPC) $(FLAGS) src/mhw_lookup.cpp -c -o $@
+$(OBJDIR)/mhw_lookup.o: src/parsing/mhw_lookup.cpp src/parsing/mhw_lookup.h src/parsing/memory.h \
+ src/parsing/patterns.h src/display/ui.h src/timer.h src/display/vbrush.h \
+ src/parsing/mhw_lookup_monster.h src/parsing/offsets.h src/data/data.h $(OBJDIR)/__setup_obj_dir
+	$(CPPC) $(FLAGS) src/parsing/mhw_lookup.cpp -c -o $@
 
-$(OBJDIR)/main.o: src/main.cpp src/memory.h src/patterns.h src/ui.h src/timer.h \
- src/vbrush.h src/wdisplay.h src/fdisplay.h src/events.h src/mhw_lookup.h \
+$(OBJDIR)/main.o: src/main.cpp src/parsing/memory.h src/parsing/patterns.h src/display/ui.h src/timer.h \
+ src/display/vbrush.h src/display/wdisplay.h src/display/fdisplay.h src/events.h src/parsing/mhw_lookup.h \
  src/utils.h $(OBJDIR)/__setup_obj_dir
 	$(CPPC) $(FLAGS) src/main.cpp -c -o $@
 
 $(OBJDIR)/utils.o: src/utils.cpp src/utils.h $(OBJDIR)/__setup_obj_dir
 	$(CPPC) $(FLAGS) src/utils.cpp -c -o $@
 
-$(OBJDIR)/ui.o: src/ui.cpp src/ui.h src/timer.h src/vbrush.h $(OBJDIR)/__setup_obj_dir
-	$(CPPC) $(FLAGS) src/ui.cpp -c -o $@
+$(OBJDIR)/ui.o: src/display/ui.cpp src/display/ui.h src/timer.h src/display/vbrush.h $(OBJDIR)/__setup_obj_dir
+	$(CPPC) $(FLAGS) src/display/ui.cpp -c -o $@
 
-$(OBJDIR)/fdisplay.o: src/fdisplay.cpp src/fdisplay.h src/vbrush.h \
+$(OBJDIR)/fdisplay.o: src/display/fdisplay.cpp src/display/fdisplay.h src/display/vbrush.h \
  src/hashtext_fmt.h $(OBJDIR)/__setup_obj_dir
-	$(CPPC) $(FLAGS) src/fdisplay.cpp -c -o $@
+	$(CPPC) $(FLAGS) src/display/fdisplay.cpp -c -o $@
 
-$(OBJDIR)/memory.o: src/memory.cpp src/memory.h src/patterns.h $(OBJDIR)/__setup_obj_dir
-	$(CPPC) $(FLAGS) src/memory.cpp -c -o $@
+$(OBJDIR)/memory.o: src/parsing/memory.cpp src/parsing/memory.h src/parsing/patterns.h $(OBJDIR)/__setup_obj_dir
+	$(CPPC) $(FLAGS) src/parsing/memory.cpp -c -o $@
 
-$(OBJDIR)/patterns.o: src/patterns.cpp src/patterns.h $(OBJDIR)/__setup_obj_dir
-	$(CPPC) $(FLAGS) src/patterns.cpp -c -o $@
+$(OBJDIR)/patterns.o: src/parsing/patterns.cpp src/parsing/patterns.h $(OBJDIR)/__setup_obj_dir
+	$(CPPC) $(FLAGS) src/parsing/patterns.cpp -c -o $@
 
 $(OBJDIR)/__setup_obj_dir :
 	mkdir -p $(OBJDIR)

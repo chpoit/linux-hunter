@@ -2,7 +2,7 @@
 #define _MHW_LOOKUP_
 
 #include "memory.h"
-#include "ui.h"
+#include "../data/data.h"
 
 namespace mhw_lookup {
 	struct pattern_data {
@@ -12,7 +12,7 @@ namespace mhw_lookup {
 					*lobby;
 	};
 	
-	extern void get_data(const pattern_data& pd, memory::browser& mb, ui::mhw_data& d);
+	extern void get_data(const pattern_data& pd, memory::browser& mb, data::mhw_data& d);
 }
 
 #endif //_MHW_LOOKUP_

@@ -1,6 +1,6 @@
 #include "ui.h"
 
-extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, const mhw_data &d, const bool no_color, const bool compact_display, const bool monsters_only)
+extern void ui::draw(vbrush::Interface *b, const size_t flags, const  data::app_data &ad, const data::mhw_data &d, const bool no_color, const bool compact_display, const bool monsters_only)
 {
 	char buf[256]; // local buffer for strings
 	if (!b->init())
@@ -33,13 +33,13 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 			// print main stats
 			{
 				b->draw_text("SessionId:[");
-				b->set_attr_on(vbrush::iface::attr::BOLD);
+				b->set_attr_on(vbrush::Interface::attr::BOLD);
 				b->draw_text(d.session_id.c_str());
-				b->set_attr_off(vbrush::iface::attr::BOLD);
+				b->set_attr_off(vbrush::Interface::attr::BOLD);
 				b->draw_text("] Host:[");
-				b->set_attr_on(vbrush::iface::attr::BOLD);
+				b->set_attr_on(vbrush::Interface::attr::BOLD);
 				b->draw_text(d.host_name.c_str());
-				b->set_attr_off(vbrush::iface::attr::BOLD);
+				b->set_attr_off(vbrush::Interface::attr::BOLD);
 				b->draw_text("]");
 				b->next_row(2);
 			}
@@ -47,9 +47,9 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 		// print header
 		{
 			std::snprintf(buf, 256, "%-*s%-4s%-10s%-8s", 32 + h_add_offset, "Player Name", "Id", "Damage", "%");
-			b->set_attr_on(vbrush::iface::attr::REVERSE);
+			b->set_attr_on(vbrush::Interface::attr::REVERSE);
 			b->draw_text(buf);
-			b->set_attr_off(vbrush::iface::attr::REVERSE);
+			b->set_attr_off(vbrush::Interface::attr::REVERSE);
 			b->next_row();
 		}
 		// compute total damage
@@ -57,7 +57,7 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 		for (size_t i = 0; i < sizeof(d.players) / sizeof(d.players[0]); ++i)
 			total_damage += (d.players[i].used) ? d.players[i].damage : 0;
 		// print players data
-		static const vbrush::iface::attr v_colors[] = {vbrush::iface::attr::C_BLUE, vbrush::iface::attr::C_MAGENTA, vbrush::iface::attr::C_YELLOW, vbrush::iface::attr::C_GREEN};
+		static const vbrush::Interface::attr v_colors[] = {vbrush::Interface::attr::C_BLUE, vbrush::Interface::attr::C_MAGENTA, vbrush::Interface::attr::C_YELLOW, vbrush::Interface::attr::C_GREEN};
 		for (size_t i = 0; i < sizeof(d.players) / sizeof(d.players[0]); ++i)
 		{
 			if (!d.players[i].used)
@@ -66,14 +66,14 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 				if (!compact_display)
 				{
 					std::snprintf(buf, 256, "%-*s%-4d                  ", 32 + h_add_offset, "<N/A>", (int)i);
-					b->set_attr_on(vbrush::iface::attr::DIM);
+					b->set_attr_on(vbrush::Interface::attr::DIM);
 					b->draw_text(buf);
-					b->set_attr_off(vbrush::iface::attr::DIM);
+					b->set_attr_off(vbrush::Interface::attr::DIM);
 					b->next_row();
 				}
 				continue;
 			}
-			const auto name_attr = (d.players[i].left_session) ? vbrush::iface::attr::DIM : v_colors[i];
+			const auto name_attr = (d.players[i].left_session) ? vbrush::Interface::attr::DIM : v_colors[i];
 			// set attribute when no_color is false
 			// OR the player has left the session
 			if (!no_color || d.players[i].left_session)
@@ -96,9 +96,9 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 		// now just the total
 		{
 			std::snprintf(buf, 256, "%-*s%-4s%10d%8s", 32 + h_add_offset, "Total", "", total_damage, (total_damage > 0) ? "100.00" : "0.0");
-			b->set_attr_on(vbrush::iface::attr::BOLD);
+			b->set_attr_on(vbrush::Interface::attr::BOLD);
 			b->draw_text(buf);
-			b->set_attr_off(vbrush::iface::attr::BOLD);
+			b->set_attr_off(vbrush::Interface::attr::BOLD);
 		}
 	}
 	// flasg to check monster data
@@ -113,15 +113,15 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 			std::snprintf(buf, 256, "%-36s%-14s%-8s%-8s%-8s", "Monster Name", "HP", "%", "Size", "Crown");
 		else
 			std::snprintf(buf, 256, "%-36s%-14s%-8s", "Monster Name", "HP", "%");
-		b->set_attr_on(vbrush::iface::attr::REVERSE);
+		b->set_attr_on(vbrush::Interface::attr::REVERSE);
 		b->draw_text(buf);
-		b->set_attr_off(vbrush::iface::attr::REVERSE);
+		b->set_attr_off(vbrush::Interface::attr::REVERSE);
 		// print the monster data
 		const int max_monsters = sizeof(d.monsters) / sizeof(d.monsters[0]);
 		int cur_monster = 0;
 		while (cur_monster < max_monsters)
 		{
-			const mhw_data::monster_info &mi = d.monsters[cur_monster];
+			const data::mhw_data::monster_info &mi = d.monsters[cur_monster];
 			if (!mi.used)
 			{
 				++cur_monster;
@@ -129,14 +129,14 @@ extern void ui::draw(vbrush::iface *b, const size_t flags, const app_data &ad, c
 			}
 			b->next_row();
 			if (mi.hp_current <= 0.001)
-				b->set_attr_on(vbrush::iface::attr::DIM);
+				b->set_attr_on(vbrush::Interface::attr::DIM);
 			if (flags & draw_flags::SHOW_CROWN_DATA)
 				std::snprintf(buf, 256, "%-36s %6d/%6d%8.2f%8.2f%8s", mi.name, (int)mi.hp_current, (int)mi.hp_total, 100.0 * mi.hp_current / mi.hp_total, mi.body_size, mi.crown);
 			else
 				std::snprintf(buf, 256, "%-36s %6d/%6d%8.2f", mi.name, (int)mi.hp_current, (int)mi.hp_total, 100.0 * mi.hp_current / mi.hp_total);
 			b->draw_text(buf);
 			if (mi.hp_current <= 0.001)
-				b->set_attr_off(vbrush::iface::attr::DIM);
+				b->set_attr_off(vbrush::Interface::attr::DIM);
 			++cur_monster;
 		}
 	}

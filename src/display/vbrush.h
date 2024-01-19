@@ -21,7 +21,7 @@
 #include <sys/types.h>
 
 namespace vbrush {
-	class iface {
+	class Interface {
 	public:
 		enum attr {
 			BOLD = 0,
@@ -40,7 +40,7 @@ namespace vbrush {
 		virtual void set_attr_on(const attr a) = 0;
 		virtual void set_attr_off(const attr a) = 0;
 		virtual void display(void) = 0;
-		virtual ~iface() {}
+		virtual ~Interface() {}
 	};
 }
 

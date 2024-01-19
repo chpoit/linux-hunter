@@ -1,11 +1,10 @@
-#ifndef _UI_H_
-#define _UI_H_
+#ifndef _DATA_H_
+#define _DATA_H_
 
 #include <string>
-#include "timer.h"
-#include "vbrush.h"
+#include "../timer.h"
 
-namespace ui {
+namespace data {
 	struct app_data {
 		const char*	version;
 		timer::cpu_ms	tm;
@@ -35,13 +34,7 @@ namespace ui {
 		monster_info	monsters[3];
 	};
 
-	enum draw_flags {
-		SHOW_MONSTER_DATA = 1,
-		SHOW_CROWN_DATA = 2,
-	};
-
-	extern void draw(vbrush::iface* b, const size_t flags, const app_data& ad, const mhw_data& d, const bool no_color, const bool compact_display, const bool monsters_only=false);
 }
 
-#endif // _UI_H_
+#endif // _DATA_H_
 

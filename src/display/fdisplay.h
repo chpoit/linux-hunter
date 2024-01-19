@@ -21,7 +21,7 @@
 #include "vbrush.h"
 
 namespace fdisplay {
-	extern vbrush::iface* get(const char* fname);
+	extern vbrush::Interface* get(const char* fname);
 }
 
 

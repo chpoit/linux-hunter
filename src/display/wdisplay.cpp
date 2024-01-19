@@ -25,13 +25,13 @@
 namespace {
 	int PLAYER_COLORS[] = { 1, 2, 3, 4 };
 
-	class wimpl : public vbrush::iface {
+	class TerminalWindow : public vbrush::Interface {
 		WINDOW 	*w_;
 		int	cur_row_,
 			cur_col_;
 
-		int to_ncurses(const vbrush::iface::attr a) {
-			using vbrush::iface;
+		int to_ncurses(const vbrush::Interface::attr a) {
+			using vbrush::Interface;
 
 			switch(a) {
 			case attr::BOLD:
@@ -54,7 +54,7 @@ namespace {
 			throw std::runtime_error("Invalid vbrush::iface::attr!");
 		}
 	public:
-		wimpl() : w_(initscr()), cur_row_(0), cur_col_(0) {
+		TerminalWindow() : w_(initscr()), cur_row_(0), cur_col_(0) {
 			// this is needed for ncursesw to print out
 			// wchar_t ...
 			setlocale(LC_CTYPE, "");
@@ -68,7 +68,7 @@ namespace {
 			}
 		}
 
-		~wimpl() {
+		~TerminalWindow() {
 			endwin();
 		}
 
@@ -104,11 +104,11 @@ namespace {
 			cur_col_ = 0;
 		}
 
-		virtual void set_attr_on(const vbrush::iface::attr a) {
+		virtual void set_attr_on(const vbrush::Interface::attr a) {
 			attron(to_ncurses(a));
 		}
 
-		virtual void set_attr_off(const vbrush::iface::attr a) {
+		virtual void set_attr_off(const vbrush::Interface::attr a) {
 			attroff(to_ncurses(a));
 		}
 
@@ -118,7 +118,7 @@ namespace {
 	};
 }
 
-vbrush::iface* wdisplay::get(void) {
-	return new wimpl;
+vbrush::Interface* wdisplay::get(void) {
+	return new TerminalWindow;
 }
 

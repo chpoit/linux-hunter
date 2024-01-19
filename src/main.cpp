@@ -21,13 +21,14 @@
 #include <cstring>
 #include <memory>
 #include <csignal>
-#include "memory.h"
-#include "ui.h"
-#include "wdisplay.h"
-#include "fdisplay.h"
+#include "data/data.h"
+#include "parsing/memory.h"
+#include "display/ui.h"
+#include "display/wdisplay.h"
+#include "display/fdisplay.h"
 #include "events.h"
 #include "timer.h"
-#include "mhw_lookup.h"
+#include "parsing/mhw_lookup.h"
 #include "utils.h"
 
 // Useful links with the SmartHunter sources; note that
@@ -60,7 +61,7 @@ namespace {
 	pid_t		mhw_pid = -1;
 	std::string	save_dir,
 			load_dir,
-			file_display;
+			file_display_name;
 	bool	        show_monsters_data = false,
 			show_crowns_data = false,
 			debug_ptrs = false,
@@ -70,12 +71,15 @@ namespace {
 			direct_mem = true,
 			no_color = false,
 			compact_display = false,
-			monsters_only = false;
+			monsters_only = false,
+			vkdto_monsters_only = false
+			;
 	size_t		refresh_interval = 1000;
 
 	void print_help(const char *prog, const char *version) {
 		std::cerr <<	"Usage: " << prog << " [options]\nExecutes linux-hunter " << version << "\n\n"
-				"-v, --monsters-only    If true, only shows monster data in the vkdto file\n"
+				"-o, --monsters-only    If true, only shows monster data in the linux-hunter terminal\n"
+				"-v, --vkdto-monsters-only    If true, only shows monster data in the vkdto file\n"
 				"-m, --show-monsters    Shows HP monsters data (requires slightly more CPU usage)\n"
 				"-c, --show-crowns      Shows information about crowns (Gold Small, Silver Large and Gold Large)\n"
 				"-s, --save dir         Captures the specified pid into directory 'dir' and quits\n"
@@ -119,7 +123,8 @@ namespace {
 		static struct option	long_options[] = {
 			{"help",		no_argument,	   0,	0},
 			{"mhw-pid",		required_argument, 0,   0},
-			{"monsters-only",	no_argument,       0,	'v'},
+			{"monsters-only",	no_argument,       0,	'o'},
+			{"vkdto-monsters-only",	no_argument,       0,	'v'},
 			{"show-monsters",	no_argument,	   0,	'm'},
 			{"show-crowns",	    no_argument,	   0,	'c'},
 			{"save",		required_argument, 0,	's'},
@@ -140,7 +145,7 @@ namespace {
 			// getopt_long stores the option index here
 			int		option_index = 0;
 
-			if(-1 == (c = getopt_long(argc, argv, "s:l:r:vmcf:",  long_options, &option_index)))
+			if(-1 == (c = getopt_long(argc, argv, "s:l:r:vomcf:",  long_options, &option_index)))
 				break;
 
 			switch (c) {
@@ -188,7 +193,7 @@ namespace {
 			} break;
 
 			case 'f': {
-				file_display = optarg;
+				file_display_name = optarg;
 			} break;
 
 			case 'm': {
@@ -200,6 +205,10 @@ namespace {
 			} break;
 			
 			case 'v':{
+				vkdto_monsters_only = true;
+			} break;
+			
+			case 'o':{
 				monsters_only = true;
 			} break;
 
@@ -264,6 +273,8 @@ int main(int argc, char *argv[]) {
 				p6(patterns::PlayerNameLinux),
 				p7(patterns::LobbyStatus);
 		memory::pattern	*p_vec[] = { &p0, &p1, &p2, &p3, &p4 , &p5, &p6, &p7 };
+		memory::pattern	*p_monster_vec[] = { &p3 };
+
 		// parse args first
 		const auto optind = parse_args(argc, argv, argv[0], VERSION);
 		// check come consistency
@@ -301,7 +312,11 @@ int main(int argc, char *argv[]) {
 		}
 
 		std::cerr << "Finding main AoB entry points..." << std::endl;
-		mb.find_patterns(&p_vec[0], &p_vec[sizeof(p_vec)/sizeof(p_vec[0])], debug_all);
+				if (monsters_only && vkdto_monsters_only){
+			mb.find_patterns(&p_monster_vec[0], &p_monster_vec[sizeof(p_monster_vec) / sizeof(p_monster_vec[0])], debug_all);
+		}else{
+			mb.find_patterns(&p_vec[0], &p_vec[sizeof(p_vec) / sizeof(p_vec[0])], debug_all);
+		}
 		if(debug_ptrs) {
 			/*
 			 * This code is used to ensure the read_mem was
@@ -325,10 +340,11 @@ int main(int argc, char *argv[]) {
 		if(show_monsters_data && (-1 == p3.mem_location))
 			throw std::runtime_error("Can't find AoB for patterns::Monster");
 		// main loop
-		std::unique_ptr<vbrush::iface>	w_dpy(wdisplay::get()),
-						f_dpy((file_display.empty()) ? 0 : fdisplay::get(file_display.c_str()));
-		ui::app_data			ad{ VERSION, timer::cpu_ms()};
-		ui::mhw_data			mhwd;
+		std::unique_ptr<vbrush::Interface>	window_sidplay(wdisplay::get()),
+						file_display((file_display_name.empty()) ? 0 : fdisplay::get(file_display_name.c_str()));
+
+		data::app_data			ad{ VERSION, timer::cpu_ms()};
+		data::mhw_data			mhwd;
 		size_t				draw_flags = 0;
 		if(show_monsters_data)
 			draw_flags |= ui::draw_flags::SHOW_MONSTER_DATA;
@@ -347,8 +363,8 @@ int main(int argc, char *argv[]) {
 			timer::thread_tmr	tt(&ad.tm);
 			mb.update();
 			mhw_lookup::get_data(mhwpd, mb, mhwd);
-			ui::draw(w_dpy.get(), draw_flags, ad, mhwd, no_color, compact_display);
-			if(f_dpy) ui::draw(f_dpy.get(), draw_flags, ad, mhwd, no_color, compact_display, monsters_only);
+			ui::draw(window_sidplay.get(), draw_flags, ad, mhwd, no_color, compact_display, monsters_only);
+			if(file_display) ui::draw(file_display.get(), draw_flags, ad, mhwd, no_color, compact_display, vkdto_monsters_only);
 			size_t			cur_refresh_tm = 0;
 			do {
 				const auto 	tm_get = tt.get_wall();
